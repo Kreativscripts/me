@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pat Williams | Home</title>
+    <link rel="stylesheet" href="Prettify.css">
+    <link rel="stylesheet" href="Buttons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { margin: 0; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <!-- Loader (1.5 seconds) -->
+    <div class="loader" id="loader">
+        <img src="https://cdn.pfps.gg/banners/1565-shadow.gif" alt="Loading...">
+    </div>
+    
+    <!-- Full-screen intro -->
+    <div class="intro-container" id="intro-container" style="display: none;">
+        <div class="viewer-count">
+            <div class="eye-icon"><i class="fas fa-eye"></i></div>
+            <div class="count-number" id="viewerCount">0</div>
+            <div class="likes-count">
+                <i class="fas fa-heart"></i>
+                <span id="likesCount">0</span>
+            </div>
+        </div>
+        
+        <div class="intro-content">
+            <div class="intro-left">
+                <h1>Pat Williams</h1>
+                <p>15 years</p>
+                <p>Ontario Canada</p>
+            </div>
+            
+            <div class="intro-right">
+                <div class="sword-button-container">
+                    <button class="sword-button" id="aboutMeBtn">
+                        <span>About Me</span>
+                        <div class="sword-icon"><i class="fas fa-sword"></i></div>
+                    </button>
+                    <div class="like-btn" id="likeBtn">
+                        <i class="far fa-heart"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="intro-quote">
+            <p>"The needs must lot when you can make your own service. 😊"</p>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show loader initially
+        const loader = document.getElementById('loader');
+        const introContainer = document.getElementById('intro-container');
+        
+        // After 1.5 seconds, hide loader and show content
+        setTimeout(() => {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+                introContainer.style.display = 'block';
+            }, 300);
+        }, 1500);
+
+        // Initialize viewer counter
+        if (!localStorage.getItem('globalViewCount')) {
+            localStorage.setItem('globalViewCount', '0');
+        }
+        
+        if (!sessionStorage.getItem('viewCounted')) {
+            const currentCount = parseInt(localStorage.getItem('globalViewCount'));
+            const newCount = currentCount + 1;
+            localStorage.setItem('globalViewCount', newCount.toString());
+            sessionStorage.setItem('viewCounted', 'true');
+        }
+        
+        document.querySelectorAll('.count-number').forEach(el => {
+            el.textContent = localStorage.getItem('globalViewCount');
+        });
+
+        // Initialize like counter
+        if (!localStorage.getItem('globalLikeCount')) {
+            localStorage.setItem('globalLikeCount', '0');
+        }
+        
+        document.querySelectorAll('#likesCount').forEach(el => {
+            el.textContent = localStorage.getItem('globalLikeCount');
+        });
+        
+        const likeBtn = document.getElementById('likeBtn');
+        if (likeBtn) {
+            likeBtn.addEventListener('click', () => {
+                if (!localStorage.getItem('hasLiked')) {
+                    const currentLikes = parseInt(localStorage.getItem('globalLikeCount'));
+                    const newLikes = currentLikes + 1;
+                    localStorage.setItem('globalLikeCount', newLikes.toString());
+                    localStorage.setItem('hasLiked', 'true');
+                    
+                    document.querySelectorAll('#likesCount').forEach(el => {
+                        el.textContent = newLikes;
+                    });
+                    
+                    likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
+                    likeBtn.classList.add('liked');
+                }
+            });
+        }
+
+        // About Me button transition
+        const aboutMeBtn = document.getElementById('aboutMeBtn');
+        if (aboutMeBtn) {
+            aboutMeBtn.addEventListener('click', function() {
+                const flash = document.createElement('div');
+                flash.className = 'flash-effect';
+                document.body.appendChild(flash);
+                flash.style.animation = 'flash 1s';
+                setTimeout(() => {
+                    window.location.href = 'main.html';
+                }, 1000);
+            });
+        }
+
+        // Mouse trail effect
+        const canvas = document.createElement('canvas');
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100vw';
+        canvas.style.height = '100vh';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '9999';
+        document.body.appendChild(canvas);
+        
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        let particles = [];
+        const colors = ['#00ffff', '#ffffff', '#00ffaa'];
+        
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 1;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 2 - 1;
+                this.life = 100;
+            }
+            
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.size > 0.1) this.size -= 0.05;
+                this.life--;
+            }
+            
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function handleParticles() {
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                
+                if (particles[i].size <= 0.1 || particles[i].life <= 0) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+        
+        window.addEventListener('mousemove', (e) => {
+            for (let i = 0; i < 3; i++) {
+                particles.push(new Particle(e.clientX, e.clientY));
+            }
+        });
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            handleParticles();
+            requestAnimationFrame(animate);
+        }
+        animate();
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    });
+    </script>
+</body>
+</html>
